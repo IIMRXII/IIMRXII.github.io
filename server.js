@@ -1,54 +1,63 @@
-const express = require('express'); // Импортируем Express
-const bodyParser = require('body-parser'); // Импортируем body-parser для обработки JSON
-const fs = require('fs'); // Импортируем файловую систему
-const cors = require('cors'); // Импортируем cors для работы с кросс-доменными запросами
+const express = require('express');
+const bodyParser = require('body-parser');
+const fs = require('fs');
+const path = require('path');
+const cors = require('cors');
 
-// Создание приложения Express
+// Создание приложения
 const app = express();
-const PORT = 3000; // Указываем порт, на котором будет работать сервер
+const PORT = process.env.PORT || 3000; // Используй PORT из окружения или 3000 по умолчанию
 
 // Включение промежуточного ПО
-app.use(cors()); // Разрешаем кросс-доменные запросы
-app.use(bodyParser.json()); // Обрабатываем JSON в запросах
+app.use(cors());
+app.use(bodyParser.json());
 
-// Эндпоинт для получения данных о кликах
+// Статическое обслуживание файлов из папки 'public'
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Эндпоинт для получения количества монет
 app.get('/coins/:userId', (req, res) => {
-    const userId = req.params.userId; // Получаем ID пользователя из URL
-    
-    // Чтение данных из файла
+    const userId = req.params.userId;
+
+    // Здесь предполагается, что у тебя есть coins.json для хранения данных о монетах
     fs.readFile('coins.json', 'utf8', (err, data) => {
         if (err) {
-            return res.status(500).json({ error: 'Ошибка чтения файла' }); // Обрабатываем ошибку чтения файла
+            return res.status(500).json({ error: 'Ошибка чтения файла.' });
         }
-        
-        const coins = JSON.parse(data || '{}'); // Парсим данные JSON
-        const userCoins = coins[userId] || 0; // Получаем монеты для этого пользователя
 
-        res.json({ coins: userCoins }); // Отправляем количество монет пользователю
+        const coinsData = JSON.parse(data);
+        const userCoins = coinsData[userId] || 0; // Если пользователь не найден, возвращаем 0
+        res.json({ coins: userCoins });
     });
 });
 
-// Эндпоинт для обновления данных о кликах
+// Эндпоинт для обновления количества монет
 app.post('/coins', (req, res) => {
-    const { userId } = req.body; // Извлекаем userId из тела запроса
-    
-    // Чтение данных из файла
+    const userId = req.body.userId;
+
+    // Здесь предполагается, что у тебя есть coins.json для хранения данных о монетах
     fs.readFile('coins.json', 'utf8', (err, data) => {
-        const coins = JSON.parse(data || '{}'); // Парсим данные JSON
-        coins[userId] = (coins[userId] || 0) + 1; // Увеличиваем количество монет для пользователя
+        if (err) {
+            return res.status(500).json({ error: 'Ошибка чтения файла.' });
+        }
 
-        // Записываем обновленные данные обратно в файл
-        fs.writeFile('coins.json', JSON.stringify(coins), (err) => {
+        const coinsData = JSON.parse(data);
+        coinsData[userId] = (coinsData[userId] || 0) + 1; // Увеличиваем количество монет на 1
+        fs.writeFile('coins.json', JSON.stringify(coinsData), (err) => {
             if (err) {
-                return res.status(500).json({ error: 'Ошибка при записи в файл' }); // Обрабатываем ошибку записи файла
+                return res.status(500).json({ error: 'Ошибка записи файла.' });
             }
-
-            res.json({ coins: coins[userId] }); // Отправляем обновленное количество монет пользователю
+            res.json({ coins: coinsData[userId] });
         });
     });
 });
 
+// Обработчик корневого маршрута
+app.get('/', (req, res) => {
+    res.send('Сервер работает!'); // Отправляем простой текст для проверки
+});
+
 // Запуск сервера
 app.listen(PORT, () => {
-    console.log(`Сервер запущен на http://localhost:${PORT}`); // Выводим сообщение о запуске сервера
+    console.log(`Сервер запущен на http://localhost:${PORT}`);
 });
