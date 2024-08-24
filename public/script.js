@@ -30,7 +30,7 @@ document.getElementById('coinButton').onclick = function() {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ userId: userId }) // Отправляем ID пользователя
+        body: JSON.stringify({ userId: userId, coins: coinCount }) // Если нужно отправить текущее количество монет
     })
     .then(response => {
         if (!response.ok) {
