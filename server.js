@@ -34,6 +34,10 @@ app.post('/coins', (req, res) => {
     
     // Чтение данных из файла
     fs.readFile('coins.json', 'utf8', (err, data) => {
+        if (err) {
+            return res.status(500).json({ error: 'Ошибка чтения файла' }); // Обрабатываем ошибку чтения файла
+        }
+
         const coins = JSON.parse(data || '{}'); // Парсим данные JSON
         coins[userId] = (coins[userId] || 0) + 1; // Увеличиваем количество монет для пользователя
 
