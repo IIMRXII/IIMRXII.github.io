@@ -35,9 +35,7 @@ document.getElementById('coinButton').onclick = function() {
     .then(response => {
         if (!response.ok) {
             throw new Error('Ошибка обновления количества монет');
-
-> UniversusGPT Neurobot:
-}
+        }
         return response.json(); // Преобразуем ответ в JSON
     })
     .then(data => {
@@ -52,4 +50,3 @@ document.getElementById('coinButton').onclick = function() {
 window.onload = function() {
     getCoins(); // Вызов функции для получения количества монет с сервера
 };
-
