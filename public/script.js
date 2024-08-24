@@ -3,16 +3,14 @@ const userId = 'user_' + Math.random().toString(36).substr(2, 9); // Генер�
 
 // Функция для получения количества монет с сервера
 function getCoins() {
-    fetch(`/coins/${userId}`) // Запрос на сервер
+    fetch(`/coins/${userId}`) // Запрос на сервер с уникальным userId
         .then(response => {
             if (!response.ok) {
                 throw new Error('Ошибка загрузки количества монет');
             }
             return response.json(); // Преобразование ответа в JSON
         })
-
-> UniversusGPT Neurobot:
-.then(data => {
+        .then(data => {
             coinCount = data.coins; // Обновляем coinCount из ответа сервера
             document.getElementById('coinCount').innerText = `У тебя ${coinCount} монет!`; // Обновляем текст на странице
         })
