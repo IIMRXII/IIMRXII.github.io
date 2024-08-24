@@ -17,15 +17,24 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Эндпоинт для получения количества монет
 app.get('/coins/:userId', (req, res) => {
-    const userId = req.params.userId;
+    const userId = req.params.userId; // Получаем userId из параметров
 
-    // Здесь предполагается, что у тебя есть coins.json для хранения данных о монетах
     fs.readFile('coins.json', 'utf8', (err, data) => {
         if (err) {
+            console.error('Ошибка чтения файла:', err);
             return res.status(500).json({ error: 'Ошибка чтения файла.' });
         }
 
-        const coinsData = JSON.parse(data);
+        let coinsData = {};
+        if (data) {
+            try {
+                coinsData = JSON.parse(data); // Парсинг JSON
+            } catch (parseError) {
+                console.error('Ошибка парсинга JSON:', parseError);
+                return res.status(500).json({ error: 'Ошибка парсинга данных.' });
+            }
+        }
+
         const userCoins = coinsData[userId] || 0; // Если пользователь не найден, возвращаем 0
         res.json({ coins: userCoins });
     });
@@ -33,20 +42,35 @@ app.get('/coins/:userId', (req, res) => {
 
 // Эндпоинт для обновления количества монет
 app.post('/coins', (req, res) => {
-    const userId = req.body.userId;
+    const userId = req.body.userId; // Получаем userId из тела запроса
 
-    // Здесь предполагается, что у тебя есть coins.json для хранения данных о монетах
     fs.readFile('coins.json', 'utf8', (err, data) => {
         if (err) {
+            console.error('Ошибка чтения файла:', err);
             return res.status(500).json({ error: 'Ошибка чтения файла.' });
         }
 
-        const coinsData = JSON.parse(data);
-        coinsData[userId] = (coinsData[userId] || 0) + 1; // Увеличиваем количество монет на 1
+        let coinsData = {};
+        if (data) {
+            try {
+                coinsData = JSON.parse(data); // Парсинг JSON
+            } catch (parseError) {
+                console.error('Ошибка парсинга JSON:', parseError);
+                return res.status(500).json({ error: 'Ошибка парсинга данных.' });
+            }
+        }
+
+        // Увеличиваем количество монет на 1 для конкретного пользователя
+        coinsData[userId] = (coinsData[userId] || 0) + 1;
+
+        // Сохранение изменений в файл
         fs.writeFile('coins.json', JSON.stringify(coinsData), (err) => {
             if (err) {
+                console.error('Ошибка записи в файл:', err);
                 return res.status(500).json({ error: 'Ошибка записи файла.' });
             }
+
+            // Возвращаем текущее количество монет
             res.json({ coins: coinsData[userId] });
         });
     });
@@ -54,7 +78,7 @@ app.post('/coins', (req, res) => {
 
 // Обработчик корневого маршрута
 app.get('/', (req, res) => {
-    res.send('Сервер работает!'); // Отправляем простой текст для проверки
+    res.sendFile(path.join(__dirname, 'public', 'index.html')); // Отправляем файл index.html
 });
 
 // Запуск сервера
