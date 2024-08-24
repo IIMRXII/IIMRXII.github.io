@@ -1,52 +1,34 @@
-let coinCount = 0; // Переменная для хранения количества монет
-const userId = 'user_' + Math.random().toString(36).substr(2, 9); // Генерация уникального ID для каждого пользователя
+let coinCount = 0;
+const userId = 'user123'; // Это должен быть уникальный идентификатор для каждого пользователя
 
-// Функция для получения количества монет с сервера
-function getCoins() {
-    fetch(`/coins/${userId}`) // Запрос на сервер
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Ошибка загрузки количества монет');
-            }
-            return response.json(); // Преобразование ответа в JSON
-        })
-        .then(data => {
-            coinCount = data.coins; // Обновляем coinCount из ответа сервера
-            document.getElementById('coinCount').innerText = `У тебя ${coinCount} монет!`; // Обновляем текст на странице
-        })
-        .catch(error => {
-            console.error('Ошибка при получении количества монет:', error);
-        });
-}
+// Получить количество монет при загрузке
+fetch(`http://localhost:3000/coins/${userId}`)
+    .then(response => response.json())
+    .then(data => {
+        coinCount = data.coins; // Устанавливаем количество монет
+        document.getElementById('coinCount').innerText = `У тебя ${coinCount} монет!`;
+    });
 
-// Обработчик клика на кнопку
-document.getElementById('coinButton').onclick = function() {
+// Обработка клика по кнопке
+document.getElementById('coinButton').addEventListener('click', () => {
     coinCount++; // Увеличиваем количество монет на 1
-    document.getElementById('coinCount').innerText = `У тебя ${coinCount} монет!`; // Обновляем текст на странице
+    document.getElementById('coinCount').innerText = `У тебя ${coinCount} монет!`;
 
-    // Отправляем обновление количества монет на сервер
-    fetch('/coins', {
+    // Отправка обновленного количества монет на сервер
+    fetch('http://localhost:3000/coins', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ userId: userId, coins: coinCount }) // Если нужно отправить текущее количество монет
+        body: JSON.stringify({ userId }) // Отправляем userId в формате JSON
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Ошибка обновления количества монет');
-        }
-        return response.json(); // Преобразуем ответ в JSON
-    })
+    .then(response => response.json())
     .then(data => {
-        console.log('Монеты обновлены на сервере:', data);
+        document.getElementById('coinCount').innerText = `У тебя ${data.coins} монет!`;
     })
     .catch(error => {
-        console.error('Ошибка при обновлении монет на сервере:', error);
+        console.error('Ошибка:', error); // Обработка ошибок
     });
-};
+});
 
-// Получаем количество монет при загрузке страницы
-window.onload = function() {
-    getCoins(); // Вызов функции для получения количества монет с сервера
-};
+
