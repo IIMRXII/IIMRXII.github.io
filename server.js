@@ -6,7 +6,7 @@ const cors = require('cors');
 
 // Создание приложения
 const app = express();
-const PORT = process.env.PORT || 3000; // Используй PORT из окружения или 3000 по умолчанию
+const PORT = 3000; // Используй PORT из окружения или 3000 по умолчанию
 
 // Включение промежуточного ПО
 app.use(cors());
