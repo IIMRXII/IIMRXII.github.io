@@ -1,33 +1,49 @@
 const express = require('express');
+const bodyParser = require('body-parser');
 const fs = require('fs');
+const path = require('path');
+const cors = require('cors');
+
+// Создание приложения
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000; // Используй PORT из окружения или 3000 по умолчанию
 
-app.use(express.json());
+// Включение промежуточного ПО
+app.use(cors());
+app.use(bodyParser.json());
 
-// Чтение количества монет из файла
-app.post('/coins', (req, res) => {
-    const userId = req.body.userId;
+// Статическое обслуживание файлов из папки 'public'
+app.use(express.static(path.join(__dirname, 'public')));
 
+// Эндпоинт для получения количества монет
+app.get('/coins/:userId', (req, res) => {
+    const userId = req.params.userId;
+
+    // Здесь предполагается, что у тебя есть coins.json для хранения данных о монетах
     fs.readFile('coins.json', 'utf8', (err, data) => {
         if (err) {
             return res.status(500).json({ error: 'Ошибка чтения файла.' });
         }
 
-        let coinsData;
-        try {
-            coinsData = JSON.parse(data);
-        } catch (parseErr) {
-            return res.status(500).json({ error: 'Ошибка парсинга данных.' });
+        const coinsData = JSON.parse(data);
+        const userCoins = coinsData[userId] || 0; // Если пользователь не найден, возвращаем 0
+        res.json({ coins: userCoins });
+    });
+});
+
+// Эндпоинт для обновления количества монет
+app.post('/coins', (req, res) => {
+    const userId = req.body.userId;
+
+    // Здесь предполагается, что у тебя есть coins.json для хранения данных о монетах
+    fs.readFile('coins.json', 'utf8', (err, data) => {
+        if (err) {
+            return res.status(500).json({ error: 'Ошибка чтения файла.' });
         }
 
-        // Увеличиваем монеты для пользователя
-        if (!coinsData[userId]) {
-            coinsData[userId] = 0;
-        }
-        coinsData[userId] += 1;
-
-        fs.writeFile('coins.json', JSON.stringify(coinsData, null, 2), (err) => {
+        const coinsData = JSON.parse(data);
+        coinsData[userId] = (coinsData[userId] || 0) + 1; // Увеличиваем количество монет на 1
+        fs.writeFile('coins.json', JSON.stringify(coinsData), (err) => {
             if (err) {
                 return res.status(500).json({ error: 'Ошибка записи файла.' });
             }
@@ -36,25 +52,9 @@ app.post('/coins', (req, res) => {
     });
 });
 
-// Получение монет для пользователя
-app.get('/coins/:userId', (req, res) => {
-    const userId = req.params.userId;
-
-    fs.readFile('coins.json', 'utf8', (err, data) => {
-        if (err) {
-            return res.status(500).json({ error: 'Ошибка чтения файла.' });
-        }
-
-        let coinsData;
-        try {
-            coinsData = JSON.parse(data);
-        } catch (parseErr) {
-            return res.status(500).json({ error: 'Ошибка парсинга данных.' });
-        }
-
-        const userCoins = coinsData[userId] || 0;
-        res.json({ coins: userCoins });
-    });
+// Обработчик корневого маршрута
+app.get('/', (req, res) => {
+    res.send('Сервер работает!'); // Отправляем простой текст для проверки
 });
 
 // Запуск сервера
