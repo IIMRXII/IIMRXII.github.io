@@ -12,10 +12,7 @@ function getCoins() {
         })
         .then(data => {
             coinCount = data.coins; // Обновляем coinCount из ответа сервера
-            document.getElementById('coinCount').innerText = `У тебя ${coinCount} монет!`; // Обновляем текст на ст
-
-> UniversusGPT Neurobot:
-ранице
+            document.getElementById('coinCount').innerText = `У тебя ${coinCount} монет!`; // Обновляем текст на странице
         })
         .catch(error => {
             console.error('Ошибка при получении количества монет:', error);
@@ -53,4 +50,3 @@ document.getElementById('coinButton').onclick = function() {
 window.onload = function() {
     getCoins(); // Вызов функции для получения количества монет с сервера
 };
-
