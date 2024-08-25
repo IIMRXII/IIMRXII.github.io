@@ -1,5 +1,5 @@
 let coinCount = 0; // Переменная для хранения количества монет
-const userId = 'user1'; // Идентификатор пользователя (может быть изменен)
+const userId = 'user_' + Math.random().toString(36).substr(2, 9); // Генерация уникального ID для каждого пользователя
 
 // Функция для получения количества монет с сервера
 function getCoins() {
@@ -12,7 +12,10 @@ function getCoins() {
         })
         .then(data => {
             coinCount = data.coins; // Обновляем coinCount из ответа сервера
-            document.getElementById('coinCount').innerText = `У тебя ${coinCount} монет!`; // Обновляем текст на странице
+            document.getElementById('coinCount').innerText = `У тебя ${coinCount} монет!`; // Обновляем текст на ст
+
+> UniversusGPT Neurobot:
+ранице
         })
         .catch(error => {
             console.error('Ошибка при получении количества монет:', error);
@@ -50,3 +53,4 @@ document.getElementById('coinButton').onclick = function() {
 window.onload = function() {
     getCoins(); // Вызов функции для получения количества монет с сервера
 };
+
